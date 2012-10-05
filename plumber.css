@@ -36,3 +36,21 @@
 	padding-right: 0.5em;
 	text-align: right;
 }
+
+.inputarea {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 200px;
+	height: 100%;
+	background-color: red;
+}
+
+.outputarea {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 200px;
+	height: 100%;
+	background-color: blue;
+}

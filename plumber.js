@@ -44,9 +44,11 @@
 			return n;
 		}
 		var nodes = []
-		nodes.push(cloneNode());
 		nodes.push(cloneNode({
-			left: '400px',
+			left: '300px'
+		}));
+		nodes.push(cloneNode({
+			left: '500px',
 			top: '200px'
 		}))
 
@@ -88,6 +90,16 @@
 			return true;
 		});
 
+		p.makeSource($('.inputarea'),
+			{
+				anchor:"Continuous",
+				endpoint:["Rectangle", { width:40, height:20 }]
+			});
+		p.makeTarget($('.outputarea'),
+			{
+				anchor:"Continuous",
+				endpoint:["Rectangle", { width:40, height:20 }]
+			});
 	}
 	jsPlumb.ready(init);
 }())
