@@ -1,4 +1,6 @@
 (function() {
+ var inputcolor = '#558822'
+ var outputcolor = '#225588'
 	function init() {
 		console.log("Initializing Plumber")
 
@@ -17,18 +19,14 @@
 				cursor: "pointer",
 				zIndex: 2000
 			},
-			EndpointStyle: {
-				fillStyle: "#225588",
-				opacity: 0.5
-			},
 			PaintStyle: {
 				gradient: {
 					stops: [
-						[0, "#225588"],
-						[1, "#558822"]
+						[0, outputcolor],
+						[1, inputcolor]
 					]
 				},
-				strokeStyle: "#558822",
+				strokeStyle: outputcolor,
 				lineWidth: 4
 			},
 			Overlays: ["Arrow"]
@@ -64,12 +62,14 @@
 				var e = p.addEndpoint(n, {
 					anchor: [0, ($(ep).position().top + $(ep).height() / 2) / height, -1, 0],
 					isTarget: true,
+                                        paintStyle: { fillStyle: inputcolor },
 					maxConnections: 1
 				})
 			});
 			_.each($(n).find('.outputs .ep'), function(ep, i) {
 				var e = p.addEndpoint(n, {
 					anchor: [1, ($(ep).position().top + $(ep).height() / 2) / height, 1, 0],
+                                        paintStyle: { fillStyle: outputcolor },
 					isSource: true,
 					maxConnections: -1
 				})
