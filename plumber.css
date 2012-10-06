@@ -37,6 +37,11 @@
 	text-align: right;
 }
 
+body > h1 {
+	position: absolute;
+	left: 200px;
+}
+
 .inputarea {
 	position: absolute;
 	left: 0;
@@ -60,6 +65,7 @@
 	height: 300px;
 	position: absolute;
 	bottom: 0;
+	overflow: scroll;
 	left: 0;
 	background-color: yellow;
 }

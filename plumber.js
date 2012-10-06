@@ -7,17 +7,22 @@
 		p.draggable(node);
 		var inputs = {};
 		var outputs = {}
+
 		function fix() {
 			var height = node.height();
+
 			function f(value) {
-				value.endpoint.anchor.y = (value.dom.position().top + value.dom.height()/2) / height;
+				value.endpoint.anchor.y = (value.dom.position().top + value.dom.height() / 2) / height;
 			}
-			_.each(inputs,f);
-			_.each(inputs,f);
+			_.each(inputs, f);
+			_.each(outputs, f);
 		}
 		var a = {
-			setXY: function(x,y) {
-				node.css({left:x, top:y})
+			setXY: function(x, y) {
+				node.css({
+					left: x,
+					top: y
+				})
 				return a;
 			},
 			setTitle: function(t) {
@@ -49,7 +54,10 @@
 					},
 					maxConnections: 1
 				})
-				inputs[name] = {dom: ep, endpoint: e};
+				inputs[name] = {
+					dom: ep,
+					endpoint: e
+				};
 				window.e = e;
 				fix();
 				return a;
@@ -67,7 +75,10 @@
 					isSource: true,
 					maxConnections: -1
 				})
-				outputs[name] = {dom: ep, endpoint: e};;
+				outputs[name] = {
+					dom: ep,
+					endpoint: e
+				};;
 				fix();
 
 				return a;
@@ -88,29 +99,29 @@
 		return n;
 	}
 
-	function load_test(name,p,inputs,outputs) {
+	function load_test(name, p, inputs, outputs) {
 		console.log("Loading " + name)
 		$.get(name, null, function(data) {
 			data = $(data);
 
 			var filenodes = data.find("nodes > node");
-			if(filenodes.length == 0)
-				return;
+			if(filenodes.length == 0) return;
 			var minx = filenodes[0].getAttribute('x');
 			var maxx = minx;
 			var miny = filenodes[0].getAttribute('y');
 			var maxy = miny;
-			_.each(filenodes, function(n) { 
+			_.each(filenodes, function(n) {
 				var x = parseFloat(n.getAttribute('x'));
 				var y = parseFloat(n.getAttribute('y'));
-				if(x < minx) minx = x; if(x > maxx) maxx = x;
-				if(y < miny) miny = y; if(y > maxy) maxy = y;
-				 });
+				if(x < minx) minx = x;
+				if(x > maxx) maxx = x;
+				if(y < miny) miny = y;
+				if(y > maxy) maxy = y;
+			});
 
 			var nodes = {}
-			_.each(filenodes,function(node) {
-				var n = newNode(p).setXY(parseFloat(node.getAttribute('x'))-minx + 300,
-					parseFloat(node.getAttribute('y'))-miny).setTitle(node.getAttribute('kind'));
+			_.each(filenodes, function(node) {
+				var n = newNode(p).setXY(parseFloat(node.getAttribute('x')) - minx + 300, parseFloat(node.getAttribute('y')) - miny + 100).setTitle(node.getAttribute('kind'));
 				nodes[node.getAttribute('name')] = n;
 				$(node).find("param").each(function(index, param) {
 					n.addInput(param.getAttribute('name'))
@@ -118,25 +129,34 @@
 			})
 			data.find("connections > connection").each(function(index, connection) {
 				try {
-				var fromnode = nodes[connection.getAttribute('fromname')];
-				var tonode = nodes[connection.getAttribute('toname')];
-				var fromport = fromnode.getOutput(connection.getAttribute("fromport"));
-				var toport = tonode.getInput(connection.getAttribute("toport"));
-				p.connect({source:fromport,target:toport});
-			} catch(e) {
-				console.log("failed to create connection");
-				console.log(connection);
-			}
+					var fromnode = nodes[connection.getAttribute('fromname')];
+					var tonode = nodes[connection.getAttribute('toname')];
+					var fromport = fromnode.getOutput(connection.getAttribute("fromport"));
+					var toport = tonode.getInput(connection.getAttribute("toport"));
+					p.connect({
+						source: fromport,
+						target: toport
+					});
+				} catch(e) {
+					console.log("failed to create connection");
+					console.log(connection);
+				}
 			})
-			data.find("exports > input").each(function(index,i) {
+			data.find("exports > input").each(function(index, i) {
 				var node = nodes[i.getAttribute('name')];
 				var port = node.getInput(i.getAttribute('port'));
-				p.connect({source: inputs,target: port})
+				p.connect({
+					source: inputs,
+					target: port
+				})
 			})
-			data.find("exports > output").each(function(index,i) {
+			data.find("exports > output").each(function(index, i) {
 				var node = nodes[i.getAttribute('name')];
 				var port = node.getOutput(i.getAttribute('port'));
-				p.connect({source: port,target: outputs})
+				p.connect({
+					source: port,
+					target: outputs
+				})
 			})
 		})
 	}
@@ -173,8 +193,6 @@
 		});
 
 		var container = $('body');
-
-		
 
 
 		var nodes = []
@@ -248,9 +266,10 @@
 		});
 
 		function load(name) {
+			$("body > h1").html(name);
 			p.deleteEveryEndpoint();
 			$('.node').remove();
-			load_test(name,p,$('.inputarea'),$('.outputarea'));						
+			load_test(name, p, $('.inputarea'), $('.outputarea'));
 		}
 
 		load("SuperSin.xml");
@@ -263,9 +282,9 @@
 				var li = $("<li>" + node + "</li>");
 				ul.append(li);
 				li.click(function() {
-					load("nodes/" + node);
+					load("newGraphEditor/" + node);
 				})
-			})			
+			})
 		})
 	}
 	jsPlumb.ready(init);
