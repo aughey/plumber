@@ -18,6 +18,7 @@
 			_.each(outputs, f);
 		}
 		var a = {
+			dom: node,
 			setXY: function(x, y) {
 				node.css({
 					left: x,
@@ -58,7 +59,6 @@
 					dom: ep,
 					endpoint: e
 				};
-				window.e = e;
 				fix();
 				return a;
 			},
@@ -87,12 +87,14 @@
 		return a;
 	}
 
+	var container = null;
+
 	function cloneNode(css) {
 		var nodetemplate = $('#nodetemplate .nodetemplate');
 		var n = nodetemplate.clone();
 		n.removeClass("nodetemplate");
 		n.addClass('node');
-		n.appendTo('body');
+		n.appendTo(container);
 		if(css) {
 			n.css(css)
 		}
@@ -128,7 +130,6 @@
 				});
 			})
 			data.find("connections > connection").each(function(index, connection) {
-				try {
 					var fromnode = nodes[connection.getAttribute('fromname')];
 					var tonode = nodes[connection.getAttribute('toname')];
 					var fromport = fromnode.getOutput(connection.getAttribute("fromport"));
@@ -137,32 +138,70 @@
 						source: fromport,
 						target: toport
 					});
-				} catch(e) {
-					console.log("failed to create connection");
-					console.log(connection);
-				}
 			})
+			var useexp = false;
 			data.find("exports > input").each(function(index, i) {
 				var node = nodes[i.getAttribute('name')];
 				var port = node.getInput(i.getAttribute('port'));
-				p.connect({
-					source: inputs,
-					target: port
-				})
+				if(useexp) {
+					var exp = $("<div class='exportnode'></div>")
+					exp.html("Export");
+					container.append(exp);
+					var ep = p.addEndpoint(exp);
+					var setpos = function() {
+						var xy = port.anchor.getCurrentLocation();
+						exp.css({
+							left: xy[0] - exp.width()-50,
+							top: xy[1]
+							})
+					}
+					window.ep = ep;
+					setpos();
+
+					node.dom.bind("drag", setpos);
+
+					p.connect({
+						source: ep,
+						target: port
+					})
+				} else {
+					p.connect({
+						source: inputs,
+						target: port
+					})
+				}
 			})
 			data.find("exports > output").each(function(index, i) {
 				var node = nodes[i.getAttribute('name')];
 				var port = node.getOutput(i.getAttribute('port'));
-				p.connect({
-					source: port,
-					target: outputs
-				})
+				if(useexp) {
+					var exp = $("<div class='exportnode'></div>")
+					exp.html("Export");
+					container.append(exp);
+					xy = port.anchor.getCurrentLocation();
+					exp.css({
+						left: xy[0] + 50,
+						top: xy[1]
+						})
+
+					p.connect({
+						source: port,
+						target: exp
+					})
+				} else {
+					p.connect({
+						source: port,
+						target: outputs
+					})
+				}
 			})
 		})
 	}
 
 	function init() {
 		console.log("Initializing Plumber")
+
+		container = $('#workarea')
 
 		// chrome fix.
 		document.onselectstart = function() {
@@ -175,6 +214,8 @@
 			{
 				radius: 7
 			}],
+			//Connector: ["Flowchart"],
+			Connector: ["Bezier", {curviness: 50}],
 			DragOptions: {
 				cursor: "pointer",
 				zIndex: 2000
@@ -189,10 +230,8 @@
 				strokeStyle: outputcolor,
 				lineWidth: 4
 			},
-			Overlays: ["Arrow"]
+			Overlays: ["PlainArrow"]
 		});
-
-		var container = $('body');
 
 
 		var nodes = []
@@ -269,13 +308,19 @@
 			$("body > h1").html(name);
 			p.deleteEveryEndpoint();
 			$('.node').remove();
+			$('.exportnode').remove();
 			load_test(name, p, $('.inputarea'), $('.outputarea'));
 		}
 
 		load("SuperSin.xml");
 
-		var loadwin = $("<div class='loadwin'><ul></ul></div>");
+		var loadwin = $("<div class='loadwin'><div class='showhide'>Show/Hide</div><ul></ul></div>");
 		container.append(loadwin);
+		//loadwin.hide();
+		loadwin.find('.showhide').click(function() {
+			loadwin.find("ul").toggle('slow');
+		})
+		loadwin.find("ul").hide();
 		$.getJSON("nodes.json", {}, function(nodes) {
 			var ul = loadwin.find("ul");
 			_.each(nodes, function(node) {
@@ -283,8 +328,15 @@
 				ul.append(li);
 				li.click(function() {
 					load("newGraphEditor/" + node);
+					loadwin.find("ul").hide('slow');
 				})
 			})
+		})
+
+		$(window).keypress(function(e) {
+			if(e.charCode == 47) {
+				loadwin.find("ul").toggle('slow');
+			}
 		})
 	}
 	jsPlumb.ready(init);

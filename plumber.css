@@ -24,6 +24,11 @@
 	border-bottom: 1px dotted gray;
 }
 
+.exportnode {
+	background: red;
+	position: absolute;
+}
+
 .node td {
 /*	border: 1px solid black; */
 }
@@ -61,11 +66,14 @@ body > h1 {
 }
 
 .loadwin {
-	width: 400px;
-	height: 300px;
 	position: absolute;
 	bottom: 0;
-	overflow: scroll;
 	left: 0;
 	background-color: yellow;
+}
+
+.loadwin ul {
+	width: 400px;
+	max-height: 300px;
+	overflow: scroll;
 }
