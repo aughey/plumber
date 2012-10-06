@@ -1,7 +1,7 @@
 .node {
 	border:2px solid #346789; 
  
-/*	z-index:20; */
+	z-index:10;
 	position:absolute; 
 	background-color:white;
 	font-family:helvetica;
@@ -45,6 +45,18 @@
 body > h1 {
 	position: absolute;
 	left: 200px;
+}
+
+.group {
+	z-index: 5;
+	background-color: rgba(0,255,0,0.25);
+	border: 3px dashed black;
+	border-radius: 10px;
+	position: absolute;
+}
+
+.group .title {
+	font-size: 200%;
 }
 
 .inputarea {

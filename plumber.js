@@ -17,14 +17,29 @@
 			_.each(inputs, f);
 			_.each(outputs, f);
 		}
+		var xy = [0,0];
 		var a = {
 			dom: node,
 			setXY: function(x, y) {
+				xy[0] = x;
+				xy[1] = y;
 				node.css({
 					left: x,
 					top: y
 				})
 				return a;
+			},
+			x: function() {
+				return node.position().left
+			},
+			y: function() {
+				return node.position().top
+			},
+			maxx: function() {
+				return this.x() + node.width();
+			},
+			maxy: function() {
+				return this.y() + node.height();
 			},
 			setTitle: function(t) {
 				node.find(".title").html(t);
@@ -195,6 +210,43 @@
 					})
 				}
 			})
+			data.find("groups > group").each(function(index, g){
+				var objs = _.map($(g).find("object"), function(o) {
+					return nodes[o.getAttribute('name')];
+				});
+				if(objs.length == 0)
+					return;
+				var group = $("<div class='group'><div class='title'></div></div>");
+				group.find('.title').html(g.getAttribute('name'))
+				container.append(group);
+				var computeGroup = function() {
+					var minmax = _.reduce(objs, function(memo,o) {
+						return [
+							Math.min(memo[0],o.x()),
+							Math.min(memo[1],o.y()),
+							Math.max(memo[2],o.maxx()),
+							Math.max(memo[3],o.maxy()),
+						]
+					},[objs[0].x(),objs[0].y(),objs[0].maxx(),objs[0].maxy()])
+
+					var titleheight = group.find('.title').height();
+					var margin = 10;
+					group.css({
+						left: minmax[0] - margin,
+						top: minmax[1] - titleheight - margin,
+						width: minmax[2] - minmax[0] + margin*2,
+						height: minmax[3] - minmax[1] + titleheight + margin*2,
+					})
+				}
+				computeGroup();
+				_.each(objs, function(o) {
+					o.dom.bind('drag',computeGroup);
+				})
+				p.draggable(group)
+				group.bind('drag', function(d) {
+					console.log(d)
+				})
+			});
 		})
 	}
 
@@ -212,7 +264,7 @@
 		var p = jsPlumb.getInstance({
 			Endpoint: ["Dot",
 			{
-				radius: 7
+				radius: 7,
 			}],
 			//Connector: ["Flowchart"],
 			Connector: ["Bezier", {curviness: 50}],
@@ -308,11 +360,12 @@
 			$("body > h1").html(name);
 			p.deleteEveryEndpoint();
 			$('.node').remove();
+			$('.group').remove();
 			$('.exportnode').remove();
 			load_test(name, p, $('.inputarea'), $('.outputarea'));
 		}
 
-		load("SuperSin.xml");
+		load("newGraphEditor/xmlcomponents/Scalar Converstion/wall.xml");
 
 		var loadwin = $("<div class='loadwin'><div class='showhide'>Show/Hide</div><ul></ul></div>");
 		container.append(loadwin);
